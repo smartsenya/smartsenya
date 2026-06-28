@@ -1,0 +1,32 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond dégradé vert -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2ecc71;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a6645;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fond rond -->
+  <circle cx="256" cy="256" r="256" fill="url(#grad)"/>
+  
+  <!-- Goutte d'eau principale (grande) -->
+  <path d="M 256 80 C 256 80, 320 150, 320 210 C 320 260, 290 290, 256 290 C 222 290, 192 260, 192 210 C 192 150, 256 80, 256 80 Z" 
+        fill="#ffffff" opacity="0.95"/>
+  
+  <!-- Goutte secondaire (petite) en haut à droite -->
+  <path d="M 360 120 C 360 120, 385 155, 385 180 C 385 205, 370 220, 355 220 C 340 220, 325 205, 325 180 C 325 155, 360 120, 360 120 Z" 
+        fill="#ffffff" opacity="0.7"/>
+  
+  <!-- Goutte secondaire (petite) en bas à gauche -->
+  <path d="M 150 280 C 150 280, 175 315, 175 340 C 175 365, 160 380, 145 380 C 130 380, 115 365, 115 340 C 115 315, 150 280, 150 280 Z" 
+        fill="#ffffff" opacity="0.6"/>
+  
+  <!-- Feuille en bas -->
+  <path d="M 200 350 Q 256 450, 310 350 Q 280 380, 256 385 Q 230 380, 200 350 Z" 
+        fill="#a8f0c6" opacity="0.9"/>
+  
+  <!-- Texte "Smart Senya" en bas -->
+  <text x="256" y="460" font-family="Arial, sans-serif" font-size="36" font-weight="bold" 
+        text-anchor="middle" fill="#0d3d2b">Senya</text>
+</svg>

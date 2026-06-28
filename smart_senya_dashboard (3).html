@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Senya — Irrigation Connectée</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2ecc71">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Smart Senya">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "9fa6ce1f-ca24-40e9-b626-d86e7ec6815b",
+        notifyButton: { enable: false },
+        allowLocalhostAsSecureOrigin: true,
+      });
+    });
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vert-fonce:   #0d3d2b;
+      --vert-moyen:   #1a6645;
+      --vert-vif:     #2ecc71;
+      --vert-pale:    #a8f0c6;
+      --terre:        #8B5E3C;
+      --ciel:         #5ba4cf;
+      --blanc:        #f7faf8;
+      --gris-clair:   #e8f0eb;
+      --gris-texte:   #6b7c72;
+      --rouge:        #e74c3c;
+      --orange:       #f39c12;
+      --fond:         #0a2a1c;
+      --carte:        #112d1f;
+      --carte-bord:   #1e4d35;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--fond);
+      color: var(--blanc);
+      min-height: 100vh;
+    }
+
+    /* ---- HEADER ---- */
+    header {
+      background: var(--carte);
+      border-bottom: 1px solid var(--carte-bord);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--vert-vif);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--blanc);
+      letter-spacing: 0.5px;
+    }
+
+    .logo-text span {
+      color: var(--vert-vif);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .connexion-dot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--gris-texte);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--vert-vif);
+      animation: pulse 2s infinite;
+    }
+
+    .dot.offline { background: var(--rouge); animation: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .btn-notif {
+      background: var(--carte-bord);
+      border: none;
+      color: var(--blanc);
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      position: relative;
+    }
+
+    .notif-badge {
+      position: absolute;
+      top: -4px; right: -4px;
+      background: var(--rouge);
+      color: white;
+      font-size: 9px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* ---- LAYOUT ---- */
+    main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px 100px;
+    }
+
+    /* ---- MÉTÉO BANNER ---- */
+    .meteo-banner {
+      background: linear-gradient(135deg, #1a4a6e 0%, #0d3d2b 100%);
+      border: 1px solid #2a5a8a;
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .meteo-left { display: flex; align-items: center; gap: 12px; }
+    .meteo-icon { font-size: 2.2rem; }
+    .meteo-info h3 { font-size: 0.72rem; color: var(--ciel); text-transform: uppercase; letter-spacing: 1px; }
+    .meteo-info p { font-size: 1.4rem; font-weight: 700; }
+    .meteo-info small { font-size: 0.75rem; color: #94b8d0; }
+
+    .meteo-right { text-align: right; }
+    .meteo-pluie {
+      background: rgba(91,164,207,0.15);
+      border: 1px solid rgba(91,164,207,0.3);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      color: var(--ciel);
+    }
+    .meteo-conseil {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: var(--vert-vif);
+      font-weight: 500;
+    }
+
+    /* ---- SECTION TITRE ---- */
+    .section-titre {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--gris-texte);
+      margin: 24px 0 12px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ---- CARTE VANNE ---- */
+    .vanne-carte {
+      background: var(--carte);
+      border: 1px solid var(--carte-bord);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 14px;
+      transition: border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vanne-carte.active {
+      border-color: var(--vert-vif);
+    }
+
+    .vanne-carte.active::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--vert-vif), var(--vert-pale));
+    }
+
+    .vanne-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .vanne-info h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .vanne-zone {
+      font-size: 0.75rem;
+      color: var(--gris-texte);
+    }
+
+    .vanne-statut {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .badge-statut {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .badge-statut.on {
+      background: rgba(46,204,113,0.15);
+      color: var(--vert-vif);
+      border: 1px solid rgba(46,204,113,0.3);
+    }
+
+    .badge-statut.off {
+      background: rgba(107,124,114,0.15);
+      color: var(--gris-texte);
+      border: 1px solid rgba(107,124,114,0.2);
+    }
+
+    .source-badge {
+      font-size: 0.65rem;
+      color: var(--gris-texte);
+    }
+
+    /* ---- TOGGLE ---- */
+    .vanne-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 56px;
+      height: 30px;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #1e3a2a;
+      border: 2px solid var(--carte-bord);
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .toggle-slider:before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 3px; top: 3px;
+      background: var(--gris-texte);
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: rgba(46,204,113,0.15);
+      border-color: var(--vert-vif);
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+      background: var(--vert-vif);
+      box-shadow: 0 0 8px var(--vert-vif);
+    }
+
+    .toggle-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gris-texte);
+    }
+
+    /* ---- MINUTERIE ---- */
+    .minuterie-btn {
+      background: var(--carte-bord);
+      border: none;
+      color: var(--blanc);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .minuterie-btn:hover { background: #2a4d38; }
+
+    .minuterie-panel {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--carte-bord);
+    }
+
+    .minuterie-panel.open { display: block; }
+
+    .minuterie-panel p {
+      font-size: 0.75rem;
+      color: var(--gris-texte);
+      margin-bottom: 10px;
+    }
+
+    .durees {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .duree-btn {
+      background: var(--carte-bord);
+      border: 1px solid transparent;
+      color: var(--blanc);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: 'DM Mono', monospace;
+      transition: all 0.2s;
+    }
+
+    .duree-btn:hover, .duree-btn.selected {
+      border-color: var(--vert-vif);
+      color: var(--vert-vif);
+      background: rgba(46,204,113,0.1);
+    }
+
+    .minuterie-start {
+      margin-top: 10px;
+      background: var(--vert-moyen);
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    .minuterie-start:hover { background: var(--vert-vif); color: var(--vert-fonce); }
+
+    /* ---- COMPTE À REBOURS ---- */
+    .compte-rebours {
+      display: none;
+      margin-top: 10px;
+      background: rgba(46,204,113,0.08);
+      border: 1px solid rgba(46,204,113,0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--vert-pale);
+      text-align: center;
+    }
+
+    /* ---- STATS MINI ---- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat-carte {
+      background: var(--carte);
+      border: 1px solid var(--carte-bord);
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .stat-valeur {
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      color: var(--vert-vif);
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--gris-texte);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* ---- HISTORIQUE ---- */
+    .historique-liste {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .histo-item {
+      background: var(--carte);
+      border: 1px solid var(--carte-bord);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .histo-icone {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .histo-icone.on  { background: rgba(46,204,113,0.15); }
+    .histo-icone.off { background: rgba(107,124,114,0.1); }
+    .histo-icone.auto { background: rgba(91,164,207,0.15); }
+
+    .histo-texte { flex: 1; }
+    .histo-texte strong { font-size: 0.85rem; display: block; }
+    .histo-texte span { font-size: 0.72rem; color: var(--gris-texte); }
+
+    .histo-duree {
+      font-size: 0.72rem;
+      color: var(--gris-texte);
+      font-family: 'DM Mono', monospace;
+      text-align: right;
+    }
+
+    /* ---- NAV BAS ---- */
+    nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--carte);
+      border-top: 1px solid var(--carte-bord);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0 20px;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--gris-texte);
+      cursor: pointer;
+      padding: 6px 16px;
+      border-radius: 12px;
+      transition: color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .nav-btn.active { color: var(--vert-vif); }
+    .nav-btn span { font-size: 20px; }
+    .nav-btn small { font-size: 0.65rem; font-weight: 500; }
+
+    /* ---- TOAST ---- */
+    .toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: var(--vert-moyen);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ---- PAGES ---- */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ---- PROGRAMME ---- */
+    .prog-carte {
+      background: var(--carte);
+      border: 1px solid var(--carte-bord);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+
+    .prog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .prog-header h3 { font-size: 0.95rem; font-weight: 600; }
+
+    .prog-jours {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .jour {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: var(--carte-bord);
+      color: var(--gris-texte);
+    }
+
+    .jour.actif {
+      background: rgba(46,204,113,0.2);
+      color: var(--vert-vif);
+      border: 1px solid var(--vert-vif);
+    }
+
+    .prog-horaire {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--gris-texte);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prog-horaire strong { color: var(--blanc); font-size: 1rem; }
+
+    .btn-ajouter {
+      width: 100%;
+      background: none;
+      border: 2px dashed var(--carte-bord);
+      color: var(--gris-texte);
+      padding: 14px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-ajouter:hover {
+      border-color: var(--vert-vif);
+      color: var(--vert-vif);
+    }
+
+    @media (max-width: 360px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">💧</div>
+    <div class="logo-text">Smart <span>Senya</span></div>
+  </div>
+  <div class="header-right">
+    <div class="connexion-dot">
+      <div class="dot" id="dot-connexion"></div>
+      <span id="txt-connexion">Connecté</span>
+    </div>
+    <button class="btn-notif" onclick="showToast('2 alertes en attente')">
+      🔔
+      <span class="notif-badge">2</span>
+    </button>
+  </div>
+</header>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<main>
+
+  <!-- PAGE : ACCUEIL -->
+  <div class="page active" id="page-accueil">
+
+    <!-- MÉTÉO -->
+    <div class="meteo-banner" id="meteo-banner">
+      <div class="meteo-left">
+        <div class="meteo-icon" id="meteo-icon">⏳</div>
+        <div class="meteo-info">
+          <h3>Météo locale</h3>
+          <p id="meteo-temp">--°C</p>
+          <small id="meteo-desc">Chargement...</small>
+        </div>
+      </div>
+      <div class="meteo-right">
+        <div class="meteo-pluie" id="meteo-pluie">💧 Pluie : --%</div>
+        <div class="meteo-conseil" id="meteo-conseil">🔄 Mise à jour...</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <p class="section-titre">Aujourd'hui</p>
+    <div class="stats-row">
+      <div class="stat-carte">
+        <div class="stat-valeur">2</div>
+        <div class="stat-label">Vannes</div>
+      </div>
+      <div class="stat-carte">
+        <div class="stat-valeur">45<span style="font-size:0.8rem">mn</span></div>
+        <div class="stat-label">Arrosé</div>
+      </div>
+      <div class="stat-carte">
+        <div class="stat-valeur" id="signal-rssi">-68</div>
+        <div class="stat-label">dBm LoRa</div>
+      </div>
+    </div>
+
+    <!-- VANNES -->
+    <p class="section-titre">Mes vannes</p>
+
+    <!-- VANNE 1 -->
+    <div class="vanne-carte" id="carte-v1">
+      <div class="vanne-top">
+        <div class="vanne-info">
+          <h2>💧 Vanne 1</h2>
+          <div class="vanne-zone">Zone principale — Jardin Nord</div>
+        </div>
+        <div class="vanne-statut">
+          <span class="badge-statut off" id="badge-v1">FERMÉE</span>
+          <span class="source-badge" id="source-v1">📱 App</span>
+        </div>
+      </div>
+      <div class="vanne-controls">
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="toggle-v1" onchange="toggleVanne(1, this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label" id="label-v1">Éteinte</span>
+        </div>
+        <button class="minuterie-btn" onclick="toggleMinuterie(1)">
+          ⏱ Minuterie
+        </button>
+      </div>
+      <div class="minuterie-panel" id="min-panel-v1">
+        <p>Durée d'arrosage :</p>
+        <div class="durees">
+          <button class="duree-btn" onclick="selectDuree(1, 5, this)">5 mn</button>
+          <button class="duree-btn" onclick="selectDuree(1, 10, this)">10 mn</button>
+          <button class="duree-btn" onclick="selectDuree(1, 20, this)">20 mn</button>
+          <button class="duree-btn" onclick="selectDuree(1, 30, this)">30 mn</button>
+          <button class="duree-btn" onclick="selectDuree(1, 60, this)">1 h</button>
+        </div>
+        <button class="minuterie-start" onclick="demarrerMinuterie(1)">▶ Démarrer l'arrosage</button>
+        <div class="compte-rebours" id="rebours-v1"></div>
+      </div>
+    </div>
+
+    <!-- VANNE 2 -->
+    <div class="vanne-carte" id="carte-v2">
+      <div class="vanne-top">
+        <div class="vanne-info">
+          <h2>💧 Vanne 2</h2>
+          <div class="vanne-zone">Zone secondaire — Potager</div>
+        </div>
+        <div class="vanne-statut">
+          <span class="badge-statut off" id="badge-v2">FERMÉE</span>
+          <span class="source-badge" id="source-v2">📱 App</span>
+        </div>
+      </div>
+      <div class="vanne-controls">
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="toggle-v2" onchange="toggleVanne(2, this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label" id="label-v2">Éteinte</span>
+        </div>
+        <button class="minuterie-btn" onclick="toggleMinuterie(2)">
+          ⏱ Minuterie
+        </button>
+      </div>
+      <div class="minuterie-panel" id="min-panel-v2">
+        <p>Durée d'arrosage :</p>
+        <div class="durees">
+          <button class="duree-btn" onclick="selectDuree(2, 5, this)">5 mn</button>
+          <button class="duree-btn" onclick="selectDuree(2, 10, this)">10 mn</button>
+          <button class="duree-btn" onclick="selectDuree(2, 20, this)">20 mn</button>
+          <button class="duree-btn" onclick="selectDuree(2, 30, this)">30 mn</button>
+          <button class="duree-btn" onclick="selectDuree(2, 60, this)">1 h</button>
+        </div>
+        <button class="minuterie-start" onclick="demarrerMinuterie(2)">▶ Démarrer l'arrosage</button>
+        <div class="compte-rebours" id="rebours-v2"></div>
+      </div>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <p class="section-titre">Dernières activités</p>
+    <div class="historique-liste" id="historique"></div>
+
+  </div>
+
+  <!-- PAGE : PROGRAMME -->
+  <div class="page" id="page-programme">
+    <p class="section-titre">Programmes automatiques</p>
+
+    <div class="prog-carte">
+      <div class="prog-header">
+        <h3>💧 Vanne 1 — Matin</h3>
+        <label class="toggle" style="width:44px;height:24px">
+          <input type="checkbox" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="prog-jours">
+        <div class="jour actif">L</div>
+        <div class="jour actif">M</div>
+        <div class="jour">M</div>
+        <div class="jour actif">J</div>
+        <div class="jour">V</div>
+        <div class="jour actif">S</div>
+        <div class="jour">D</div>
+      </div>
+      <div class="prog-horaire">
+        <strong>06:30</strong> pendant <strong>20 mn</strong>
+      </div>
+    </div>
+
+    <div class="prog-carte">
+      <div class="prog-header">
+        <h3>💧 Vanne 2 — Soir</h3>
+        <label class="toggle" style="width:44px;height:24px">
+          <input type="checkbox">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="prog-jours">
+        <div class="jour">L</div>
+        <div class="jour">M</div>
+        <div class="jour actif">M</div>
+        <div class="jour">J</div>
+        <div class="jour actif">V</div>
+        <div class="jour">S</div>
+        <div class="jour actif">D</div>
+      </div>
+      <div class="prog-horaire">
+        <strong>19:00</strong> pendant <strong>15 mn</strong>
+      </div>
+    </div>
+
+    <button class="btn-ajouter" onclick="showToast('Bientôt disponible — Version Premium')">
+      + Ajouter un programme
+    </button>
+  </div>
+
+  <!-- PAGE : STATISTIQUES -->
+  <div class="page" id="page-stats">
+    <p class="section-titre">Cette semaine</p>
+
+    <div class="stats-row" style="grid-template-columns:1fr 1fr">
+      <div class="stat-carte">
+        <div class="stat-valeur">3h 20</div>
+        <div class="stat-label">Temps total</div>
+      </div>
+      <div class="stat-carte">
+        <div class="stat-valeur">12</div>
+        <div class="stat-label">Cycles</div>
+      </div>
+      <div class="stat-carte">
+        <div class="stat-valeur">-68</div>
+        <div class="stat-label">dBm moy.</div>
+      </div>
+      <div class="stat-carte">
+        <div class="stat-valeur">100%</div>
+        <div class="stat-label">Fiabilité</div>
+      </div>
+    </div>
+
+    <p class="section-titre">Historique complet</p>
+    <div class="historique-liste">
+      <div class="histo-item">
+        <div class="histo-icone auto">🌤</div>
+        <div class="histo-texte">
+          <strong>Arrosage automatique</strong>
+          <span>Vanne 1 — Programme matin</span>
+        </div>
+        <div class="histo-duree">20 mn<br><span style="color:#475569">06:30</span></div>
+      </div>
+      <div class="histo-item">
+        <div class="histo-icone on">💧</div>
+        <div class="histo-texte">
+          <strong>Vanne 2 ouverte</strong>
+          <span>Via Sonoff 4CH</span>
+        </div>
+        <div class="histo-duree">15 mn<br><span style="color:#475569">hier</span></div>
+      </div>
+      <div class="histo-item">
+        <div class="histo-icone off">⏹</div>
+        <div class="histo-texte">
+          <strong>Vanne 1 fermée</strong>
+          <span>Via App mobile</span>
+        </div>
+        <div class="histo-duree">—<br><span style="color:#475569">hier</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE : PARAMÈTRES -->
+  <div class="page" id="page-params">
+    <p class="section-titre">Appareil</p>
+    <div class="prog-carte">
+      <p style="font-size:0.85rem;color:var(--gris-texte);margin-bottom:8px">Émetteur LoRa</p>
+      <p style="font-size:0.9rem;font-weight:600">ESP12E — 192.168.0.163</p>
+      <p style="font-size:0.75rem;color:var(--vert-vif);margin-top:4px">● Connecté — Signal -68 dBm</p>
+    </div>
+    <div class="prog-carte">
+      <p style="font-size:0.85rem;color:var(--gris-texte);margin-bottom:8px">Récepteur LoRa</p>
+      <p style="font-size:0.9rem;font-weight:600">ESP12E — Terrain</p>
+      <p style="font-size:0.75rem;color:var(--vert-vif);margin-top:4px">● Actif — 2 vannes connectées</p>
+    </div>
+    <p class="section-titre">Compte</p>
+    <div class="prog-carte">
+      <p style="font-size:0.85rem;color:var(--gris-texte);margin-bottom:4px">Plan actuel</p>
+      <p style="font-size:0.9rem;font-weight:600">Gratuit — 2 vannes</p>
+      <button style="margin-top:12px;background:var(--vert-moyen);border:none;color:white;padding:10px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;width:100%;font-family:'DM Sans',sans-serif" onclick="showToast('Bientôt disponible !')">
+        ⭐ Passer en Premium
+      </button>
+    </div>
+    <p class="section-titre">Notifications</p>
+    <div class="prog-carte">
+      <p style="font-size:0.85rem;color:var(--gris-texte);margin-bottom:8px">Push notifications</p>
+      <p style="font-size:0.8rem;color:var(--blanc);margin-bottom:12px">Recevez une alerte à chaque changement d'état des vannes, que ce soit via l'app ou le Sonoff.</p>
+      <button style="background:var(--carte-bord);border:none;color:white;padding:10px 20px;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;width:100%;font-family:'DM Sans',sans-serif" onclick="testerNotification()">
+        🔔 Envoyer une notification test
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- NAVIGATION -->
+<nav>
+  <button class="nav-btn active" id="nav-accueil" onclick="naviguer('accueil')">
+    <span>🏠</span>
+    <small>Accueil</small>
+  </button>
+  <button class="nav-btn" id="nav-programme" onclick="naviguer('programme')">
+    <span>📅</span>
+    <small>Programmes</small>
+  </button>
+  <button class="nav-btn" id="nav-stats" onclick="naviguer('stats')">
+    <span>📊</span>
+    <small>Stats</small>
+  </button>
+  <button class="nav-btn" id="nav-params" onclick="naviguer('params')">
+    <span>⚙️</span>
+    <small>Réglages</small>
+  </button>
+</nav>
+
+<script>
+  // --- État ---
+  const etat = { v1: false, v2: false };
+  const durees = { 1: null, 2: null };
+  const timers = { 1: null, 2: null };
+  const historique = [];
+
+  // --- IP de l'ESP émetteur ---
+  const ESP_IP = '192.168.0.163';
+
+  // --- Clé OpenWeatherMap ---
+  const METEO_API_KEY = '928b0e1be29bbe13159c7ff2b63bd842';
+
+  const icones = {
+    'Clear':'☀️','Clouds':'⛅','Rain':'🌧️','Drizzle':'🌦️',
+    'Thunderstorm':'⛈️','Snow':'❄️','Mist':'🌫️','Fog':'🌫️','Haze':'🌫️'
+  };
+
+  function chargerMeteo() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => fetchMeteo(pos.coords.latitude, pos.coords.longitude),
+        ()  => fetchMeteoVille('Tunis')
+      );
+    } else {
+      fetchMeteoVille('Tunis');
+    }
+  }
+
+  function fetchMeteo(lat, lon) {
+    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${METEO_API_KEY}&units=metric&lang=fr`)
+      .then(r => r.json()).then(afficherMeteo).catch(() => showToast('Météo indisponible'));
+  }
+
+  function fetchMeteoVille(ville) {
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=${METEO_API_KEY}&units=metric&lang=fr`)
+      .then(r => r.json()).then(afficherMeteo).catch(() => showToast('Météo indisponible'));
+  }
+
+  function afficherMeteo(d) {
+    if (!d || d.cod !== 200) { showToast('Clé météo en attente activation'); return; }
+    const temp = Math.round(d.main.temp);
+    const hum  = d.main.humidity;
+    const desc = d.weather[0].description;
+    const cond = d.weather[0].main;
+    const pluie = d.rain ? Math.round((d.rain['1h'] || 0) * 100) : 0;
+    const ville = d.name;
+
+    document.getElementById('meteo-icon').textContent = icones[cond] || '🌡️';
+    document.getElementById('meteo-temp').textContent = temp + '°C';
+    document.getElementById('meteo-desc').textContent =
+      desc.charAt(0).toUpperCase() + desc.slice(1) + ' — ' + ville + ' — Humidité ' + hum + '%';
+    document.getElementById('meteo-pluie').textContent = '💧 Pluie : ' + pluie + '%';
+
+    const conseil = document.getElementById('meteo-conseil');
+    if (['Rain','Drizzle','Thunderstorm'].includes(cond)) {
+      conseil.textContent = '🌧️ Pluie détectée — Arrosage inutile';
+      conseil.style.color = '#5ba4cf';
+    } else if (hum > 80) {
+      conseil.textContent = '💦 Humidité élevée — Arrosage léger';
+      conseil.style.color = '#f39c12';
+    } else if (temp > 35) {
+      conseil.textContent = '🔥 Forte chaleur — Arrosage conseillé';
+      conseil.style.color = '#e74c3c';
+    } else {
+      conseil.textContent = '✅ Conditions normales — Arrosage recommandé';
+      conseil.style.color = '#2ecc71';
+    }
+  }
+
+  chargerMeteo();
+  setInterval(chargerMeteo, 10 * 60 * 1000);
+
+  // --- ENREGISTRER SERVICE WORKER ---
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('✅ Service Worker enregistré'))
+        .catch(err => console.log('❌ Service Worker erreur :', err));
+    });
+  }
+
+  // --- Navigation ---
+  function naviguer(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    document.getElementById('nav-' + page).classList.add('active');
+  }
+
+  // --- Toggle vanne ---
+  function toggleVanne(v, ouvert) {
+    etat['v' + v] = ouvert;
+    mettreAJourUI(v, ouvert, '📱 App');
+    envoyerCommande(v, ouvert);
+    ajouterHistorique(v, ouvert, 'App');
+    showToast('Vanne ' + v + (ouvert ? ' ouverte ✅' : ' fermée ⏹'));
+  }
+
+  // --- Mise à jour UI ---
+  function mettreAJourUI(v, ouvert, source) {
+    const badge  = document.getElementById('badge-v' + v);
+    const label  = document.getElementById('label-v' + v);
+    const carte  = document.getElementById('carte-v' + v);
+    const srcEl  = document.getElementById('source-v' + v);
+
+    badge.textContent = ouvert ? 'OUVERTE' : 'FERMÉE';
+    badge.className = 'badge-statut ' + (ouvert ? 'on' : 'off');
+    label.textContent = ouvert ? 'Active' : 'Éteinte';
+    srcEl.textContent = source;
+    carte.classList.toggle('active', ouvert);
+    document.getElementById('toggle-v' + v).checked = ouvert;
+  }
+
+  // --- Envoyer commande à l'ESP ---
+  function envoyerCommande(v, ouvert) {
+    fetch('http://' + ESP_IP + '/commande?v=' + v + '&e=' + (ouvert ? 1 : 0))
+      .catch(() => {
+        // Mode démo si pas connecté à l'ESP
+        console.log('Mode démo - commande V' + v + ':' + (ouvert ? 1 : 0));
+      });
+  }
+
+  // --- Minuterie ---
+  function toggleMinuterie(v) {
+    const panel = document.getElementById('min-panel-v' + v);
+    panel.classList.toggle('open');
+  }
+
+  function selectDuree(v, minutes, btn) {
+    durees[v] = minutes;
+    btn.closest('.durees').querySelectorAll('.duree-btn')
+      .forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function demarrerMinuterie(v) {
+    if (!durees[v]) { showToast('Choisissez une durée !'); return; }
+
+    const secondes = durees[v] * 60;
+    let restant = secondes;
+
+    // Ouvrir la vanne
+    etat['v' + v] = true;
+    mettreAJourUI(v, true, '⏱ Minuterie');
+    envoyerCommande(v, true);
+    ajouterHistorique(v, true, 'Minuterie ' + durees[v] + ' mn');
+
+    const rebours = document.getElementById('rebours-v' + v);
+    rebours.style.display = 'block';
+
+    if (timers[v]) clearInterval(timers[v]);
+
+    timers[v] = setInterval(() => {
+      restant--;
+      const m = Math.floor(restant / 60);
+      const s = restant % 60;
+      rebours.textContent = '⏱ Fermeture dans ' + m + 'mn ' + String(s).padStart(2,'0') + 's';
+
+      if (restant <= 0) {
+        clearInterval(timers[v]);
+        rebours.style.display = 'none';
+        etat['v' + v] = false;
+        mettreAJourUI(v, false, '⏱ Minuterie');
+        envoyerCommande(v, false);
+        ajouterHistorique(v, false, 'Fin minuterie');
+        showToast('Vanne ' + v + ' — Arrosage terminé ✅');
+        document.getElementById('min-panel-v' + v).classList.remove('open');
+      }
+    }, 1000);
+
+    showToast('Vanne ' + v + ' — Arrosage ' + durees[v] + ' mn lancé ✅');
+    document.getElementById('min-panel-v' + v).classList.remove('open');
+  }
+
+  // --- Historique ---
+  function ajouterHistorique(v, ouvert, source) {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    historique.unshift({ v, ouvert, source, heure: h + ':' + m });
+    if (historique.length > 5) historique.pop();
+    renderHistorique();
+  }
+
+  function renderHistorique() {
+    const el = document.getElementById('historique');
+    el.innerHTML = historique.map(h => `
+      <div class="histo-item">
+        <div class="histo-icone ${h.ouvert ? 'on' : 'off'}">${h.ouvert ? '💧' : '⏹'}</div>
+        <div class="histo-texte">
+          <strong>Vanne ${h.v} ${h.ouvert ? 'ouverte' : 'fermée'}</strong>
+          <span>Via ${h.source}</span>
+        </div>
+        <div class="histo-duree">${h.heure}</div>
+      </div>
+    `).join('');
+  }
+
+  // --- Toast ---
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // --- Polling état ESP toutes les 3s ---
+  function pollEtat() {
+    fetch('http://' + ESP_IP + '/etat')
+      .then(r => r.json())
+      .then(d => {
+        // Sync depuis Sonoff si différent
+        if (d.v1 !== etat.v1) { etat.v1 = d.v1; mettreAJourUI(1, d.v1, '🔘 Sonoff'); }
+        if (d.v2 !== etat.v2) { etat.v2 = d.v2; mettreAJourUI(2, d.v2, '🔘 Sonoff'); }
+        document.getElementById('dot-connexion').classList.remove('offline');
+        document.getElementById('txt-connexion').textContent = 'Connecté';
+      })
+      .catch(() => {
+        document.getElementById('dot-connexion').classList.add('offline');
+        document.getElementById('txt-connexion').textContent = 'Hors ligne';
+      });
+  }
+
+  setInterval(pollEtat, 3000);
+  pollEtat();
+</script>
+</body>
+</html>
+<script>
+  // --- NOTIFICATIONS ONESIGNAL ---
+  const ONESIGNAL_APP_ID  = '9fa6ce1f-ca24-40e9-b626-d86e7ec6815b';
+  const ONESIGNAL_API_KEY = 'os_v2_app_t6tm4h6keraotnrg3bxh5rublopvda5n3x7e35uu2jfdwqvqzb6nnlq547gxkirus7zbxnbckq67gvk7y23s76owixllci3lgrtnx2a';
+
+  // Demander permission notifications
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (window.OneSignal) {
+        OneSignal.Notifications.requestPermission();
+      }
+    }, 3000);
+  });
+
+  // Envoyer notification push
+  async function envoyerNotification(titre, message) {
+    try {
+      await fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + ONESIGNAL_API_KEY
+        },
+        body: JSON.stringify({
+          app_id: ONESIGNAL_APP_ID,
+          included_segments: ['All'],
+          headings: { fr: titre, en: titre },
+          contents: { fr: message, en: message },
+          priority: 10
+        })
+      });
+      console.log('Notification envoyée : ' + titre);
+    } catch(e) {
+      console.log('Erreur notification :', e);
+    }
+  }
+
+  // Surcharge toggleVanne pour envoyer notification
+  const _toggleVanne = toggleVanne;
+  function toggleVanne(v, ouvert) {
+    _toggleVanne(v, ouvert);
+    envoyerNotification(
+      ouvert ? '💧 Vanne ' + v + ' ouverte' : '⏹ Vanne ' + v + ' fermée',
+      ouvert ? 'Arrosage démarré via Smart Senya' : 'Arrosage arrêté via Smart Senya'
+    );
+  }
+
+  // Surveiller changement Sonoff et notifier
+  let sonoffEtat = { v1: false, v2: false };
+  const _pollEtat = pollEtat;
+  function pollEtat() {
+    fetch('http://' + ESP_IP + '/etat')
+      .then(r => r.json())
+      .then(d => {
+        if (d.v1 !== etat.v1) { etat.v1 = d.v1; mettreAJourUI(1, d.v1, '🔘 Sonoff'); }
+        if (d.v2 !== etat.v2) { etat.v2 = d.v2; mettreAJourUI(2, d.v2, '🔘 Sonoff'); }
+        // Notifier si Sonoff change
+        if (d.v1 !== sonoffEtat.v1) {
+          sonoffEtat.v1 = d.v1;
+          envoyerNotification('🔘 Sonoff 4CH', 'Vanne 1 ' + (d.v1 ? 'ouverte' : 'fermée') + ' par Sonoff');
+        }
+        if (d.v2 !== sonoffEtat.v2) {
+          sonoffEtat.v2 = d.v2;
+          envoyerNotification('🔘 Sonoff 4CH', 'Vanne 2 ' + (d.v2 ? 'ouverte' : 'fermée') + ' par Sonoff');
+        }
+        document.getElementById('dot-connexion').classList.remove('offline');
+        document.getElementById('txt-connexion').textContent = 'Connecté';
+      })
+      .catch(() => {
+        document.getElementById('dot-connexion').classList.add('offline');
+        document.getElementById('txt-connexion').textContent = 'Hors ligne';
+      });
+  }
+
+  // Test notification depuis paramètres
+  function testerNotification() {
+    envoyerNotification('🌱 Smart Senya', 'Les notifications fonctionnent !');
+    showToast('Notification test envoyée ! 🔔');
+  }
+</script>

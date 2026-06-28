@@ -1,0 +1,138 @@
+╔════════════════════════════════════════════════════════════════╗
+║          SMART SENYA — GUIDE DÉPLOIEMENT PWA                 ║
+╚════════════════════════════════════════════════════════════════╝
+
+## 📱 Fichiers PWA (vous avez maintenant)
+
+✅ smart_senya_dashboard.html  → App web principale
+✅ manifest.json               → Config PWA (nom, icônes, couleurs)
+✅ sw.js                       → Service Worker (cache hors ligne)
+✅ icon.svg                    → Icône source
+
+
+═══════════════════════════════════════════════════════════════
+
+## 🔧 ÉTAPE 1 — Convertir les icônes SVG en PNG
+
+Vous devez créer 2 fichiers PNG à partir du SVG :
+- icon-192.png (192×192 px)
+- icon-512.png (512×512 px)
+
+OPTION A — En ligne (facile) :
+1. Allez sur : https://convertio.co/svg-png/
+2. Téléchargez icon.svg
+3. Convertissez en PNG à 192×192 et 512×512
+4. Renommez en icon-192.png et icon-512.png
+
+OPTION B — Avec Imagemagick (terminal) :
+$ convert -density 192 -resize 192x192 icon.svg icon-192.png
+$ convert -density 512 -resize 512x512 icon.svg icon-512.png
+
+OPTION C — Avec Inkscape (GUI) :
+1. Ouvrez icon.svg
+2. Fichier → Exporter en PNG
+3. Définissez 192×192, exportez en icon-192.png
+4. Répétez pour 512×512
+
+
+═══════════════════════════════════════════════════════════════
+
+## 🚀 ÉTAPE 2 — Mettre l'app en ligne (GitHub Pages)
+
+REQUIS :
+- Compte GitHub gratuit (https://github.com)
+- Tous les fichiers prêts
+
+STEPS:
+
+1️⃣ Créer un nouveau dépôt GitHub
+   - Nom : smart-senya
+   - Visibilité : Public
+   - Créer sans README
+
+2️⃣ Télécharger les fichiers dans le dépôt
+   - smart_senya_dashboard.html
+   - manifest.json
+   - sw.js
+   - icon-192.png (après conversion)
+   - icon-512.png (après conversion)
+
+3️⃣ Activer GitHub Pages
+   - Allez dans Settings → Pages
+   - Source : Deploy from a branch
+   - Branch : main → / (root)
+   - Save
+
+4️⃣ Attendre 2-3 minutes → votre app sera à :
+   https://votre-username.github.io/smart-senya/
+
+5️⃣ Sur mobile :
+   - Ouvrez le lien dans le navigateur
+   - Appuyez sur Menu → "Ajouter à l'écran d'accueil"
+   - L'app s'installe comme une vraie application
+
+
+═══════════════════════════════════════════════════════════════
+
+## ⚙️ ÉTAPE 3 — Adapter l'URL de l'ESP
+
+Le problème : l'app sera en HTTPS (GitHub) mais l'ESP est en HTTP.
+
+SOLUTION :
+
+Créer un serveur reverse-proxy :
+
+Utilisez Ngrok (gratuit) :
+1. Installer : https://ngrok.com/download
+2. Lancer : ngrok http 192.168.0.163:80
+3. Vous obtenez une URL HTTPS comme : https://xxxx-xx-xxx-xxx.ngrok.io
+4. Remplacez dans manifest.json :
+   "start_url": "https://xxxx-xx-xxx-xxx.ngrok.io/smart_senya_dashboard.html"
+
+OU
+
+Créer un backend Node.js qui fait le proxy (option payante)
+
+
+═══════════════════════════════════════════════════════════════
+
+## 🧪 Test local avant déploiement
+
+Sur votre ordinateur, servez l'app en HTTPS local :
+
+OPTION 1 — Python :
+$ python -m http.server 8000
+
+Puis ouvrez : http://localhost:8000/smart_senya_dashboard.html
+
+OPTION 2 — Node.js :
+$ npx http-server -p 8000
+
+OPTION 3 — VS Code :
+- Installer extension "Live Server"
+- Clic droit sur fichier → "Open with Live Server"
+
+
+═══════════════════════════════════════════════════════════════
+
+## 📝 Checklist final
+
+☐ SVG converti en PNG (192×192 et 512×512)
+☐ Fichiers uploadés sur GitHub
+☐ GitHub Pages activé
+☐ App accessible en HTTPS
+☐ Service Worker enregistré (voir console)
+☐ PWA installable sur mobile
+
+Felicitations ! 🎉
+
+
+═══════════════════════════════════════════════════════════════
+
+## 💡 Optimisations futures
+
+- Utiliser Netlify ou Vercel au lieu de GitHub (plus facile)
+- Ajouter un backend serveur (Node.js/Express) pour proxy HTTP → HTTPS
+- Créer une vraie APK Android avec React Native ou Flutter
+- Synchronisation P2P avec WebRTC pour éviter le serveur
+

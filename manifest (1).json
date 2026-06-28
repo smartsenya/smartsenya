@@ -1,0 +1,62 @@
+{
+  "name": "Smart Senya — Irrigation Connectée",
+  "short_name": "Senya",
+  "description": "Commande d'irrigation à distance avec LoRa et intelligence météo",
+  "start_url": "./smart_senya_dashboard.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a2a1c",
+  "theme_color": "#2ecc71",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "screenshots": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vanne 1 ON",
+      "short_name": "V1 ON",
+      "description": "Ouvrir Vanne 1",
+      "url": "./smart_senya_dashboard.html?action=v1on",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Vanne 2 ON",
+      "short_name": "V2 ON",
+      "description": "Ouvrir Vanne 2",
+      "url": "./smart_senya_dashboard.html?action=v2on",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
